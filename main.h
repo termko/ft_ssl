@@ -6,13 +6,6 @@
 #include <fcntl.h>
 #define HASH_COUNT 2
 
-typedef struct  s_ssl
-{
-    char *names[HASH_COUNT];
-    void (*init[HASH_COUNT])(int, char**);
-    void *sct;
-}               t_ssl;
-
 typedef struct  s_flags
 {
     char p;
@@ -21,9 +14,30 @@ typedef struct  s_flags
     char s;
 }               t_flags;
 
+typedef struct  s_ssl
+{
+    char *names[HASH_COUNT];
+    void (*init[HASH_COUNT])(struct s_ssl*, int, char**);
+    void (*constants)(struct s_ssl*);
+    void (*set_length)(struct s_ssl*);
+    void (*prepare_message)(struct s_ssl*);
+    void (*main)(struct s_ssl*);
+    void (*output)(struct s_ssl*);
+    void (*free_sct)(struct s_ssl**);
+
+    char *hash;
+    void *sct;
+    t_flags flags;
+    t_flags out;
+    int not_flags;
+    char *str;
+    char *file;
+    uint32_t len;
+}               t_ssl;
+
 typedef struct  s_md5
 {
-    char *str;
+    // char *str;
     void *input;
     uint32_t len;
     uint64_t bits_len;
@@ -45,9 +59,7 @@ typedef struct  s_md5
     uint32_t i;
     uint32_t *k;
     uint32_t *s;
-    t_flags flags;
-    t_flags out;
-    char *file;
+    // char *file;
     int not_flags;
     void (*rounds[4])(struct s_md5*);
     void (*constants)(void*);
@@ -88,8 +100,6 @@ typedef struct  s_sha256
     uint32_t needed_len;
     uint32_t zeroes_len;
     int not_flags;
-    t_flags flags;
-    t_flags out;
     void *input;
     char *str;
 }               t_sha256;
@@ -106,9 +116,12 @@ char *ft_realloc(char **str, char *tmp, int total, int got);
 void ft_bzero(void *ptr, int len);
 char *ft_memdup(char *tmp, int got);
 uint32_t btol(uint32_t num);
-void ft_md5(int ac, char **av);
-int parse_flags(t_flags *flags, t_flags *out, char **av);
+void ft_md5(t_ssl *ssl, int ac, char **av);
+int parse_flags(t_ssl *ssl, char **av);
 uint32_t ft_leftrotate(uint32_t what, uint32_t to);
 uint32_t ft_rightrotate(uint32_t what, uint32_t to);
-void ft_sha256(int ac, char **av);
+void ft_sha256(t_ssl *ssl, int ac, char **av);
 int ft_strcmp(char *s1, char *s2);
+void md5_init(t_ssl *ssl, int ac, char **av);
+void sha256_init(t_ssl *ssl, int ac, char **av);
+void start(t_ssl *ssl, int ac, char **av);

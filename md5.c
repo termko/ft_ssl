@@ -34,125 +34,29 @@ void md5_cycle(t_md5 *md5)
     }
 }
 
-void md5_output(t_md5 *md5)
+void md5_output(t_ssl *ssl)
 {
-    if (md5->out.p)
-    {
-        printf("%s", md5->str);
-        printf("%08x%08x%08x%08x\n",
-            btol(md5->A), btol(md5->B), btol(md5->C), btol(md5->D));
-        md5->out.p = 0;
-        return ;
-    }
-    if (!md5->out.q)
-    {
-        if (md5->out.r)
-        {
-            printf("%08x%08x%08x%08x ",
-            btol(md5->A), btol(md5->B), btol(md5->C), btol(md5->D));
-            if (md5->out.s)
-            {
-                printf("\"%s\"\n", md5->str);
-                md5->out.s = 0;
-            }
-            else
-                printf("%s\n", md5->file);
-        }   
-        else
-        {
-            printf("MD5 (");
-            if (md5->out.s)
-            {
-                printf("\"%s\") = ", md5->str);
-                md5->out.s = 0;
-            }
-            else
-                printf("%s) = ", md5->file);
-            printf("%08x%08x%08x%08x\n",
-            btol(md5->A), btol(md5->B), btol(md5->C), btol(md5->D));
-        }
-    }
-    else
-        printf("%08x%08x%08x%08x\n",
+  t_md5 *md5;
+
+  md5 = (t_md5*)ssl->sct;
+  printf("%08x%08x%08x%08x",
             btol(md5->A), btol(md5->B), btol(md5->C), btol(md5->D));
 }
 
-void md5_main(t_md5 *md5)
+void md5_main(t_ssl *ssl)
 {
     uint32_t i;
+    t_md5 *md5;
 
+    md5 = (t_md5*)ssl->sct;
     while (md5->void_len / 64)
     {
         md5_reset_variables(md5);
         md5_cycle(md5);
         md5_update_variables(md5);
     }
-    md5_output(md5);
 }
 
-void md5_read_file(t_md5 *md5, char *file)
-{
-    char tmp[1025];
-    int i;
-    int fd;
-    int got;
-    
-    if (file)
-    {
-        fd = open(file, O_RDONLY);
-        if (fd < 0)
-        {
-            printf("OOOOOO WRONG FILE BABE '%s'\n", file);
-            return ;
-        }
-    }
-    else
-        fd = STDIN_FILENO;
-    md5->str = NULL;
-    md5->len = 0;
-    ft_bzero(tmp, sizeof(char) * 1024);
-    i = 1;
-    while ((got = read(fd, tmp, (file ? 1024 : 1))) > 0)
-    {
-        if (!md5->str)
-            md5->str = ft_memdup(tmp, got);
-        else
-            md5->str = ft_realloc(&(md5->str), tmp, md5->len, got);
-        ft_bzero(tmp, 1024);
-        md5->len += got;
-        i++;
-    }
-    if (!file && !md5->str)
-        md5->str = ft_strdup("");
-    if (file)
-        close(fd);
-}
-
-int md5_get_string(t_md5 *md5, char *str)
-{
-    if (md5->flags.p)
-    {
-        md5->flags.p = 0;
-        md5_read_file(md5, NULL);
-        return (0);
-    }
-    if (!str)
-    {
-        md5_read_file(md5, NULL);
-        md5->file = ft_strdup("stdin");
-        return (0);
-    }
-    if (md5->flags.s)
-    {
-        md5->flags.s = 0;
-        md5->str = ft_strdup(str);
-        md5->len = ft_strlen(str);
-        return (1);
-    }
-    md5_read_file(md5, str);
-    md5->file = ft_strdup(str);
-    return (1);
-}
 
 void print_input(unsigned int *input, int len)
 {
@@ -175,11 +79,13 @@ void print_input(unsigned int *input, int len)
     }
 }
 
-void md5_prepare_message(t_md5 *md5)
+void md5_prepare_message(t_ssl *ssl)
 {
+  t_md5 *md5;
     int void_len_bits;
     int i;
     
+    md5 = (t_md5*)ssl->sct;
     void_len_bits = md5->append_len + md5->bits_len;
     md5->void_len = (void_len_bits % 8 ?
             (void_len_bits / 8) + 1 : void_len_bits / 8);
@@ -193,60 +99,56 @@ void md5_prepare_message(t_md5 *md5)
     i = 0;
     while (i < md5->len)
     {
-        ((char*)(md5->input))[i] = md5->str[i];
+        ((char*)(md5->input))[i] = ssl->str[i];
         i++;
     }
     ((char*)(md5->input))[i] = 0x80;
     ((long*)md5->input)[(md5->void_len / 8) - 1] = md5->bits_len;
 }
 
-void md5_set_length(t_md5 *md5)
+void md5_set_length(t_ssl *ssl)
 {
+  t_md5 *md5;
+  
+  md5 = (t_md5*)ssl->sct;
+  md5->len = ssl->len;
     md5->bits_len = md5->len * 8;
     md5->append_len = 512 - (md5->bits_len % 512);
     md5->zeroes_len = 512 - md5->append_len - 65;
 }
 
-void md5_free_str(t_md5 **md5)
+void md5_free_str(t_ssl **ssl)
 {
-    // if ((*md5)->str)
-    //     free((*md5)->str);
-    (*md5)->str = NULL;
-    // if ((*md5)->file)
-    //     free((*md5)->file);
-    (*md5)->file = NULL;
+    if ((*ssl)->str)
+        free((*ssl)->str);
+    (*ssl)->str = NULL;
+    if ((*ssl)->file)
+        free((*ssl)->file);
+    (*ssl)->file = NULL;
 }
 
-void md5_start(t_md5 *md5, int ac, char **av)
+void md5_constants(t_ssl *ssl)
 {
-    int i;
-    int ret;
-    
-    ret = 0;
-    i = md5->not_flags;
-    // CHECK ORIGINAL ON 'openssl md5 -s', for example
-    while (i < ac || md5->not_flags == ac)
-    {
-        md5->A = 1732584193;
-        md5->B = 4023233417;
-        md5->C = 2562383102;
-        md5->D = 271733878;
-        ret = md5_get_string(md5, av[i]);
-        if (!md5->str)
-        {
-            i++;
-            continue ;
-        }
-        md5_set_length(md5);
-        md5_prepare_message(md5);
-        md5_main(md5);
-        md5_free_str(&md5);
-        i += (md5->not_flags == ac ? 0 : ret);
-        md5->not_flags = -1;
-    }
+  t_md5 *md5;
+
+  md5 = (t_md5*)ssl->sct;
+  md5->A = 1732584193;
+  md5->B = 4023233417;
+  md5->C = 2562383102;
+  md5->D = 271733878;
 }
 
-t_md5 *md5_init(int ac, char **av)
+void md5_init_interfaces(t_ssl *ssl)
+{
+  ssl->constants = md5_constants;
+  ssl->set_length = md5_set_length;
+  ssl->prepare_message = md5_prepare_message;
+  ssl->main = md5_main;
+  ssl->output = md5_output;
+  ssl->free_sct = md5_free_str;
+}
+
+void md5_init(t_ssl *ssl, int ac, char **av)
 {
     t_md5 *md5;
     void (*rounds[4])(t_md5*) = {ft_f, ft_g, ft_h, ft_i};
@@ -258,8 +160,6 @@ t_md5 *md5_init(int ac, char **av)
         printf("Error with malloc\n");
         exit(1);
     }
-    md5->file = NULL;
-    md5->str = NULL;
     md5->k = get_k();
     md5->s = get_s();
     i = 0;
@@ -268,14 +168,7 @@ t_md5 *md5_init(int ac, char **av)
         md5->rounds[i] = rounds[i];
         i++;
     }
-    md5->not_flags = parse_flags(&(md5->flags), &(md5->out), av);
-    return (md5);
-}
-
-void ft_md5(int ac, char **av)
-{
-    t_md5 *md5;
-    
-    md5 = md5_init(ac, av);
-    md5_start(md5, ac, av);
+	ssl->sct = md5;
+  ssl->hash = ft_strdup("MD5");
+  md5_init_interfaces(ssl);
 }

@@ -117,10 +117,22 @@ void sha256_update_variables(t_sha256 *sha256)
     sha256->h7 += sha256->h;
 }
 
-void sha256_start(t_sha256 *sha256, int ac, char **av)
+void sha256_output(t_ssl *ssl)
 {
+  t_sha256 *sha256;
+
+  sha256 = (t_sha256*)ssl->sct;
+  printf("%08x%08x%08x%08x%08x%08x%08x%08x",
+            sha256->h0, sha256->h1, sha256->h2, sha256->h3,
+            sha256->h4, sha256->h5, sha256->h6, sha256->h7);
+}
+
+void sha256_main(t_ssl *ssl)
+{
+  t_sha256 *sha256;
     int i;
 
+    sha256 = (t_sha256*)ssl->sct;
     while (sha256->void_len / 64)
     {
         sha256->w = initialize_w(sha256);
@@ -130,26 +142,27 @@ void sha256_start(t_sha256 *sha256, int ac, char **av)
         sha256->void_len -= 64;
         sha256->input += 64;
     }
-    printf("%08x%08x%08x%08x%08x%08x%08x%08x",
-            sha256->h0, sha256->h1, sha256->h2, sha256->h3,
-            sha256->h4, sha256->h5, sha256->h6, sha256->h7);
 }
 
-void sha256_init_len(t_sha256 *sha256, int ac, char **av)
+void sha256_set_length(t_ssl *ssl)
 {
-    sha256->str = av[2];
-    sha256->len = ft_strlen(sha256->str);
+  t_sha256 *sha256;
+
+  sha256 = (t_sha256*)ssl->sct;
+  sha256->len = ssl->len;
     sha256->bits_len = sha256->len * 8;
     sha256->append_len = 512 - (sha256->bits_len % 512);
     sha256->zeroes_len = 512 - sha256->append_len - 65;
 }
 
-void sha256_prepare_message(t_sha256 *sha256)
+void sha256_prepare_message(t_ssl *ssl)
 {
+  t_sha256 *sha256;
     long len_bits;
     uint32_t void_len_bits;
     int i;
     
+    sha256 = (t_sha256*)ssl->sct;
     len_bits = sha256->len * 8;
     void_len_bits = sha256->append_len + len_bits;
     sha256->void_len = (void_len_bits % 8 ?
@@ -164,14 +177,49 @@ void sha256_prepare_message(t_sha256 *sha256)
     i = 0;
     while (i < sha256->len)
     {
-        ((char*)(sha256->input))[i] = sha256->str[i];
+        ((char*)(sha256->input))[i] = ssl->str[i];
         i++;
     }
     ((char*)sha256->input)[i] = 0x80;
     set_length(sha256->input, sha256->void_len, len_bits);
 }
 
-t_sha256 *sha256_init(int ac, char **av)
+void sha256_constants(t_ssl *ssl)
+{
+  t_sha256 *sha256;
+
+  sha256 = (t_sha256*)ssl->sct;
+  sha256->h0 = 0x6a09e667;
+    sha256->h1 = 0xbb67ae85;
+    sha256->h2 = 0x3c6ef372;
+    sha256->h3 = 0xa54ff53a;
+    sha256->h4 = 0x510e527f;
+    sha256->h5 = 0x9b05688c;
+    sha256->h6 = 0x1f83d9ab;
+    sha256->h7 = 0x5be0cd19;
+}
+
+void sha256_free_str(t_ssl **ssl)
+{
+    if ((*ssl)->str)
+        free((*ssl)->str);
+    (*ssl)->str = NULL;
+    if ((*ssl)->file)
+        free((*ssl)->file);
+    (*ssl)->file = NULL;
+}
+
+void sha256_init_interfaces(t_ssl *ssl)
+{
+  ssl->constants = sha256_constants;
+  ssl->set_length = sha256_set_length;
+  ssl->prepare_message = sha256_prepare_message;
+  ssl->main = sha256_main;
+  ssl->output = sha256_output;
+  ssl->free_sct = sha256_free_str;
+}
+
+void sha256_init(t_ssl *ssl, int ac, char **av)
 {
     t_sha256 *sha256;
     
@@ -181,25 +229,8 @@ t_sha256 *sha256_init(int ac, char **av)
         printf("Error with Malloc\n");
         exit(1);
     }
-    sha256->h0 = 0x6a09e667;
-    sha256->h1 = 0xbb67ae85;
-    sha256->h2 = 0x3c6ef372;
-    sha256->h3 = 0xa54ff53a;
-    sha256->h4 = 0x510e527f;
-    sha256->h5 = 0x9b05688c;
-    sha256->h6 = 0x1f83d9ab;
-    sha256->h7 = 0x5be0cd19;
     sha256->r = get_r();
-    sha256->not_flags = parse_flags(&(sha256->flags), &(sha256->out), av);
-    sha256_init_len(sha256, ac, av);
-    sha256_prepare_message(sha256);
-    return (sha256);
-}
-
-void ft_sha256(int ac, char **av)
-{
-    t_sha256 *sha256;
-    
-    sha256 = sha256_init(ac, av);
-    sha256_start(sha256, ac, av);
+    ssl->sct = sha256;
+    ssl->hash = ft_strdup("SHA256");
+    sha256_init_interfaces(ssl);
 }
