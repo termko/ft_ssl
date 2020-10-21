@@ -17,7 +17,7 @@ typedef struct  s_flags
 typedef struct  s_ssl
 {
     char *names[HASH_COUNT];
-    void (*init[HASH_COUNT])(struct s_ssl*, int, char**);
+    void (*init[HASH_COUNT])(int, char**);
     void (*constants)(struct s_ssl*);
     void (*set_length)(struct s_ssl*);
     void (*prepare_message)(struct s_ssl*);
@@ -27,9 +27,6 @@ typedef struct  s_ssl
 
     char *hash;
     void *sct;
-    t_flags flags;
-    t_flags out;
-    int not_flags;
     char *str;
     char *file;
     uint32_t len;
@@ -37,7 +34,7 @@ typedef struct  s_ssl
 
 typedef struct  s_md5
 {
-    // char *str;
+    char *str;
     void *input;
     uint32_t len;
     uint64_t bits_len;
@@ -59,12 +56,11 @@ typedef struct  s_md5
     uint32_t i;
     uint32_t *k;
     uint32_t *s;
-    // char *file;
+    char *file;
+    t_flags flags;
+    t_flags out;
     int not_flags;
     void (*rounds[4])(struct s_md5*);
-    void (*constants)(void*);
-    void (*prepare)(void*);
-    void (*main)(void*);
 }               t_md5;
 
 typedef struct  s_sha256
@@ -99,9 +95,12 @@ typedef struct  s_sha256
     uint32_t void_len;
     uint32_t needed_len;
     uint32_t zeroes_len;
+    t_flags flags;
+    t_flags out;
     int not_flags;
     void *input;
     char *str;
+    char *file;
 }               t_sha256;
 
 void ft_f(t_md5 *md5);
@@ -122,6 +121,6 @@ uint32_t ft_leftrotate(uint32_t what, uint32_t to);
 uint32_t ft_rightrotate(uint32_t what, uint32_t to);
 void ft_sha256(t_ssl *ssl, int ac, char **av);
 int ft_strcmp(char *s1, char *s2);
-void md5_init(t_ssl *ssl, int ac, char **av);
-void sha256_init(t_ssl *ssl, int ac, char **av);
+void md5_init(int ac, char **av);
+void sha256_init(int ac, char **av);
 void start(t_ssl *ssl, int ac, char **av);

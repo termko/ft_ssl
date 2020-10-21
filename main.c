@@ -207,7 +207,7 @@ t_ssl *init_ssl(void)
 {
     t_ssl *ssl;
     char *hash_names[HASH_COUNT] = {"md5", "sha256"};
-    void (*init[HASH_COUNT])(t_ssl*, int, char**) = {md5_init, sha256_init};
+    void (*init[HASH_COUNT])(int, char**) = {md5_init, sha256_init};
     int i;
     
     ssl = (t_ssl*)malloc(sizeof(t_ssl));
@@ -256,10 +256,9 @@ int main(int ac, char **av)
             i++;
         }
         printf("Cipher commands:"); // MAKE STDERR!!!
+        printf("\n");
         exit(1);
     }
-    ssl->init[i](ssl, ac, av);
-    parse_flags(ssl, av);
-    start(ssl, ac, av);
+    ssl->init[i](ac, av);
     return (0);
 }
