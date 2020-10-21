@@ -4,15 +4,23 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <fcntl.h>
-#define HASH_COUNT 2
+#define HASH_COUNT 3
 
-typedef struct  s_flags
+typedef struct  s_hashflags
 {
     char p;
     char q;
     char r;
     char s;
-}               t_flags;
+}               t_hashflags;
+
+typedef struct  s_baseflags
+{
+    char d;
+    char e;
+    char i;
+    char o;
+}               t_baseflags;
 
 typedef struct  s_ssl
 {
@@ -57,8 +65,8 @@ typedef struct  s_md5
     uint32_t *k;
     uint32_t *s;
     char *file;
-    t_flags flags;
-    t_flags out;
+    t_hashflags flags;
+    t_hashflags out;
     int not_flags;
     void (*rounds[4])(struct s_md5*);
 }               t_md5;
@@ -95,13 +103,22 @@ typedef struct  s_sha256
     uint32_t void_len;
     uint32_t needed_len;
     uint32_t zeroes_len;
-    t_flags flags;
-    t_flags out;
+    t_hashflags flags;
+    t_hashflags out;
     int not_flags;
     void *input;
     char *str;
     char *file;
 }               t_sha256;
+
+typedef struct  s_b64
+{
+    char *outfile;
+    char *infile;
+    char *str;
+    char *result;
+    t_baseflags flags;
+}               t_b64;
 
 void ft_f(t_md5 *md5);
 void ft_g(t_md5 *md5);
@@ -124,3 +141,4 @@ int ft_strcmp(char *s1, char *s2);
 void md5_init(int ac, char **av);
 void sha256_init(int ac, char **av);
 void start(t_ssl *ssl, int ac, char **av);
+void base64_init(int ac, char **av);

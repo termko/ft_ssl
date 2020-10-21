@@ -1,5 +1,5 @@
 NAME = ft_ssl
-SRC = main.c sha256.c md5.c
+SRC = main.c sha256.c md5.c base64.c
 HDR = main.h
 
 all: $(NAME)

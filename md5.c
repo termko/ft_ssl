@@ -241,7 +241,7 @@ void md5_start(t_md5 *md5, int ac, char **av)
     }
 }
 
-int md5_argv_parse(t_flags *flags, char *arg)
+int md5_argv_parse(t_hashflags *flags, char *arg)
 {
     uint32_t len;
     

@@ -206,8 +206,8 @@ uint32_t ft_rightrotate(uint32_t what, uint32_t to)
 t_ssl *init_ssl(void)
 {
     t_ssl *ssl;
-    char *hash_names[HASH_COUNT] = {"md5", "sha256"};
-    void (*init[HASH_COUNT])(int, char**) = {md5_init, sha256_init};
+    char *hash_names[HASH_COUNT] = {"md5", "sha256", "base64"};
+    void (*init[HASH_COUNT])(int, char**) = {md5_init, sha256_init, base64_init};
     int i;
     
     ssl = (t_ssl*)malloc(sizeof(t_ssl));

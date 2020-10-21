@@ -232,7 +232,7 @@ void sha256_free(t_sha256 **sha256)
     (*sha256)->file = NULL;
 }
 
-int sha256_argv_parse(t_flags *flags, char *arg)
+int sha256_argv_parse(t_hashflags *flags, char *arg)
 {
     uint32_t len;
     
