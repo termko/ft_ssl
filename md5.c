@@ -97,8 +97,9 @@ void md5_prepare_message(t_md5 *md5)
     uint32_t i;
     
     void_len_bits = md5->append_len + md5->bits_len;
-    md5->void_len = (void_len_bits % 8 ?
-            (void_len_bits / 8) + 1 : void_len_bits / 8);
+    if (md5->append_len <= 64)
+      void_len_bits += 512;
+    md5->void_len  = void_len_bits / 8;
     md5->input = malloc(md5->void_len);
     if (!(md5->input))
     {
@@ -120,7 +121,6 @@ void md5_set_length(t_md5 *md5)
 {
     md5->bits_len = md5->len * 8;
     md5->append_len = 512 - (md5->bits_len % 512);
-    md5->zeroes_len = 512 - md5->append_len - 65;
 }
 
 void md5_free_str(t_ssl **ssl)

@@ -182,7 +182,6 @@ void sha256_set_length(t_sha256 *sha256)
 {
     sha256->bits_len = sha256->len * 8;
     sha256->append_len = 512 - (sha256->bits_len % 512);
-    sha256->zeroes_len = 512 - sha256->append_len - 65;
 }
 
 void sha256_prepare_message(t_sha256 *sha256)
@@ -191,8 +190,9 @@ void sha256_prepare_message(t_sha256 *sha256)
     uint32_t i;
     
     void_len_bits = sha256->append_len + sha256->bits_len;
-    sha256->void_len = (void_len_bits % 8 ?
-            (void_len_bits / 8) + 1 : void_len_bits / 8);
+    if (sha256->append_len <= 64)
+      void_len_bits += 512;
+    sha256->void_len = void_len_bits / 8;
     sha256->input = malloc(sha256->void_len);
     if (!(sha256->input))
     {
@@ -208,7 +208,6 @@ void sha256_prepare_message(t_sha256 *sha256)
     }
     ((char*)(sha256->input))[i] = 0x80;
     set_length(sha256->input, sha256->void_len, sha256->bits_len);
-    printf("%u\n", sha256->void_len);
 }
 
 void sha256_constants(t_sha256 *sha256)
