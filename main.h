@@ -4,7 +4,8 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <fcntl.h>
-#define HASH_COUNT 3
+#define HASH_COUNT 2
+#define CIPHER_COUNT 1
 
 typedef struct  s_hashflags
 {
@@ -20,24 +21,16 @@ typedef struct  s_baseflags
     char e;
     char i;
     char o;
+    char ni;
+    char no;
 }               t_baseflags;
 
 typedef struct  s_ssl
 {
-    char *names[HASH_COUNT];
-    void (*init[HASH_COUNT])(int, char**);
-    void (*constants)(struct s_ssl*);
-    void (*set_length)(struct s_ssl*);
-    void (*prepare_message)(struct s_ssl*);
-    void (*main)(struct s_ssl*);
-    void (*output)(struct s_ssl*);
-    void (*free_sct)(struct s_ssl**);
-
-    char *hash;
-    void *sct;
-    char *str;
-    char *file;
-    uint32_t len;
+    char *hash_names[HASH_COUNT];
+    char *cipher_names[CIPHER_COUNT];
+    void (*hash_init[HASH_COUNT])(int, char**);
+    void (*cipher_init[CIPHER_COUNT])(int, char**);
 }               t_ssl;
 
 typedef struct  s_md5
@@ -113,11 +106,15 @@ typedef struct  s_sha256
 
 typedef struct  s_b64
 {
-    char *outfile;
-    char *infile;
     char *str;
     char *result;
+    uint32_t outlen;
+
+    int outfile;
+    int infile;
+    int not_flags;
     t_baseflags flags;
+    t_baseflags out;
 }               t_b64;
 
 void ft_f(t_md5 *md5);

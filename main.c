@@ -206,8 +206,10 @@ uint32_t ft_rightrotate(uint32_t what, uint32_t to)
 t_ssl *init_ssl(void)
 {
     t_ssl *ssl;
-    char *hash_names[HASH_COUNT] = {"md5", "sha256", "base64"};
-    void (*init[HASH_COUNT])(int, char**) = {md5_init, sha256_init, base64_init};
+    char *hash_names[HASH_COUNT] = {"md5", "sha256"};
+    char *cipher_names[CIPHER_COUNT] = {"base64"};
+    void (*hash_init[HASH_COUNT])(int, char**) = {md5_init, sha256_init};
+    void (*cipher_init[CIPHER_COUNT])(int, char**) = {base64_init};
     int i;
     
     ssl = (t_ssl*)malloc(sizeof(t_ssl));
@@ -219,9 +221,16 @@ t_ssl *init_ssl(void)
     i = 0;
     while (i < HASH_COUNT)
     {
-        ssl->names[i] = ft_strdup(hash_names[i]);
-        ssl->init[i] = init[i];
+        ssl->hash_names[i] = ft_strdup(hash_names[i]);
+        ssl->hash_init[i] = hash_init[i];
         i++;
+    }
+    i = 0;
+    while (i < CIPHER_COUNT)
+    {
+      ssl->cipher_names[i] = ft_strdup(cipher_names[i]);
+      ssl->cipher_init[i] = cipher_init[i];
+      i++;
     }
     return (ssl);
 }
@@ -240,25 +249,45 @@ int main(int ac, char **av)
     i = 0;
     while (i < HASH_COUNT)
     {
-        if (!ft_strcmp(av[1], ssl->names[i]))
-            break;
+        if (!ft_strcmp(av[1], ssl->hash_names[i]))
+        {
+            ssl->hash_init[i](ac, av);
+            break ;
+        }
         i++;
     }
-    if (i == HASH_COUNT)
+    if (i == HASH_COUNT) // OH GOD ITS UGLY MAKE A FLAG OR SMTH FFS
     {
+      i = 0;
+      while (i < CIPHER_COUNT)
+      {
+        if (!ft_strcmp(av[1], ssl->cipher_names[i]))
+        {
+          ssl->cipher_init[i](ac, av);
+          break ;
+        }
+      }
+      if (i == CIPHER_COUNT)
+      {
         printf("ft_ssl: Error: '%s' is an invalid command.\n\n", av[1]);
         printf("Standard commands:\n\n");
         printf("Message Digest commands:\n");
         i = 0;
         while (i < HASH_COUNT)
         {
-            printf("%s\n", ssl->names[i]);
+            printf("%s\n", ssl->hash_names[i]);
             i++;
         }
-        printf("Cipher commands:"); // MAKE STDERR!!!
+        printf("Cipher commands:");
+        i = 0;
+        while (i < CIPHER_COUNT)
+        {
+          printf("%s\n", ssl->cipher_names[i]);
+          i++;
+        } // MAKE STDERR!!!
         printf("\n");
         exit(1);
+      }
     }
-    ssl->init[i](ac, av);
     return (0);
 }

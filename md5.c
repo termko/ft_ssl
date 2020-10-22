@@ -123,14 +123,14 @@ void md5_set_length(t_md5 *md5)
     md5->append_len = 512 - (md5->bits_len % 512);
 }
 
-void md5_free_str(t_ssl **ssl)
+void md5_free_str(t_md5 **md5)
 {
-    if ((*ssl)->str)
-        free((*ssl)->str);
-    (*ssl)->str = NULL;
-    if ((*ssl)->file)
-        free((*ssl)->file);
-    (*ssl)->file = NULL;
+    if ((*md5)->str)
+        free((*md5)->str);
+    (*md5)->str = NULL;
+    if ((*md5)->file)
+        free((*md5)->file);
+    (*md5)->file = NULL;
 }
 
 void md5_constants(t_md5 *md5)
