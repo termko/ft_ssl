@@ -130,16 +130,23 @@ void b64_parse_flags(t_b64 *b64, char **av)
     b64->out.o = b64->flags.o;
 }
 
-void b64_decode(t_b64 *b64)
+int b64_index(char *table, char c)
 {
-  return ;
+  int index;
+
+  index = 0;
+  while (index < 64)
+  {
+    if (table[index] == c)
+      return (index);
+    index++;
+  }
+  return (-1);
 }
 
-void b64_encode(t_b64 *b64)
+char *b64_get_table(void)
 {
-  uint32_t len;
-  uint32_t outlen;
-  char table[64] = {
+  static char table[64] = {
     'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
     'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
     'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd',
@@ -149,6 +156,100 @@ void b64_encode(t_b64 *b64)
     '8', '9', '+', '/'
   };
 
+  return (table);
+}
+
+char *b64_clean_decode_input(t_b64 *b64, char *str)
+{
+  char *table;
+  char *ret;
+  int i;
+  int len;
+
+  table = b64_get_table();
+  i = 0;
+  len = 0;
+  while (str[i])
+  {
+    if (b64_index(table, str[i]) >= 0 || str[i] == '=')
+      len++;
+    i++;
+  }
+  ret = (char*)malloc(sizeof(char) * (len + 1));
+  if (!ret)
+  {
+    printf("Error with malloc\n");
+    exit(-1);
+  }
+  ft_bzero(ret, len + 1);
+  i = 0;
+  len = 0;
+  while (str[i])
+  {
+    if (b64_index(table, str[i]) >= 0 || str[i] == '=')
+      ret[len++] = str[i];
+    i++;
+  }
+  return (ret);
+}
+
+void b64_decode(t_b64 *b64)
+{
+  char *table;
+  uint32_t len;
+  uint32_t outlen;
+  uint32_t iter;
+  int i;
+  char tmp;
+  int index;
+  int bit;
+
+  table = b64_get_table();
+  len = ft_strlen(b64->str);
+  if (len % 4)
+  {
+    printf("Wrong format: %s\n", b64->str);
+    exit(-1);
+  }
+  outlen = len * 6 / 8;
+  b64->result = (char*)malloc(sizeof(char) * (outlen + 1));
+  ft_bzero(b64->result, outlen + 1);
+  tmp = 0;
+  i = 0;
+  iter = 0;
+  while (i < len * 6 && iter < len)
+  {
+    if (!(i % 6))
+    {
+      if (b64->str[i / 6] == '=')
+        break ;
+      index = b64_index(table, b64->str[i / 6]);
+    }
+    bit = index & (1 << (5 - (i % 6)));
+    tmp |= (bit ? 1 : 0) << (7 - (i % 8));
+    if (!(i % 8))
+    {
+      b64->result[(i - 1) / 8] = tmp;
+      printf("[%d] %c\n", tmp, tmp);
+      tmp = 0;
+    }
+    i++;
+  }
+  if (i % 8 || b64->str[i / 6] == '=')
+    b64->result[(i - 1) / 8] = tmp;
+  printf("%s", b64->result);
+}
+
+void b64_encode(t_b64 *b64)
+{
+  uint32_t len;
+  uint32_t outlen;
+  char *table;
+  int i;
+  int tmp;
+  int bit;
+
+  table = b64_get_table();
   len = ft_strlen(b64->str);
   b64->outlen = len * 8 / 6;
   if (b64->outlen % 4)
@@ -160,16 +261,11 @@ void b64_encode(t_b64 *b64)
     printf("Error with malloc\n");
     exit(-1);
   }
-  int i;
-  int tmp;
-  int bit;
   tmp = 0;
   i = 0;
   while (i < len * 8)
   {
-    // printf("Getting %d bit from %c = %d\n", 7 - (i % 8), b64->str[i / 8], ((b64->str[i / 8] & (1 << (7 - (i % 8))) ? 1 : 0)));
     bit = b64->str[i / 8] & (1 << (7 - (i % 8)));
-    // printf("moving %d << %d = %d\n", bit ? 1 : 0, 5 - (i % 6), (bit ? 1 : 0) << (5 - (i % 6)));
     tmp |= (bit ? 1 : 0) << (5 - (i % 6));
     i++;
     if (!(i % 6))
@@ -187,7 +283,7 @@ void b64_encode(t_b64 *b64)
     i++;
   }
   b64->result[i] = '\0';
-  printf("%s\n", b64->result);
+  printf("%s", b64->result);
 }
 
 void base64_init(int ac, char **av)
@@ -204,6 +300,11 @@ void base64_init(int ac, char **av)
   // so we make memlen * 8 / 6 char array and map it to the string of 64 bytes long...
   //ok it may be easy, the only hard thing is division to 6 bits... maybe take bit by bit and iterate through 8 bits of char and then iterate through 6 bits of output... mkay, seems easy... need to see how flags work
   // encode done, decode to go, not bad huh
-  b64->str = ft_strdup(av[2]);
-  b64_encode(b64);
+  // almost working, need to make sure there are no spaces, dunno how original handles it
+  // omg its done, now for the real challenge...
+  // flags are pita
+  b64_parse_flags(b64, av);
+  b64->str = b64_clean_decode_input(b64, av[2]);
+  // b64_encode(b64);
+  b64_decode(b64);
 }
