@@ -5,13 +5,19 @@ int b64_check_flag(t_b64 *b64, char *arg, uint32_t len)
   t_baseflags tmp;
   uint32_t i;
 
-  i = 0;
+  i = 1;
   while (i < len)
   {
     if (arg[1] == 'd')
+	{
+		tmp.e = 0;
         tmp.d = 1;
-    else if (arg[1] == 'e')
-        tmp.e = 1;
+	}
+	else if (arg[1] == 'e')
+	{
+		tmp.e = 1;
+        tmp.d = 0;
+	}
     else if (arg[1] == 'i')
     {
         if (i + 1 != len)
@@ -80,24 +86,42 @@ int b64_infile_open(t_b64 *b64, char *file)
   return (1);
 }
 
-int b64_argv_parse(t_b64 *b64, char *arg)
+int b64_argv_parse(t_b64 *b64, char **av)
 {
+	char *arg;
     uint32_t len;
     
+	printf("IN FUNC:\nNOT FLAGS = %d\n ARG = %s\n", b64->not_flags, av[b64->not_flags]);
+	arg = av[b64->not_flags];
+	printf("%s\n", arg);
     if (!arg)
         return (0);
     len = ft_strlen(arg);
-    if (!len)
-        return (0);
-    if (b64->flags.no)
+	if (!len)
+		return (0);
+	printf("%s\n", arg);
+    if (b64->flags.o || arg[0] != '-')
+	{
+		if (b64->outfile != STDOUT_FILENO)
+		{
+			printf("Unexpected argument: %s\n", arg);
+			exit(1);
+		}
         return (b64_outfile_open(b64, arg));
-    if (b64->flags.ni)
+	}
+	if (b64->flags.i || arg[0] != '-')
+	{
+		if (b64->infile != STDIN_FILENO)
+		{
+			printf("Unexpected argument: %s\n", arg);
+			exit(1);
+		}
         return (b64_infile_open(b64, arg));
-    if (arg[0] != '-')
+	}
+	if (arg[0] != '-')
         return (0);
     if (b64_check_flag(b64, arg, len))
         return (1);
-    
     return (1);
 }
 
@@ -108,16 +132,16 @@ void b64_parse_flags(t_b64 *b64, char **av)
     b64->flags.e = 0;
     b64->flags.i = 0;
     b64->flags.o = 0;
-    b64->flags.no = 0;
-    b64->flags.ni = 0;
-    while (b64_argv_parse(b64, av[b64->not_flags]))
-        b64->not_flags++;
-    if (b64->flags.ni)
+	printf("OUTSIDE FUNC:\ni = %d\no = %d\ne = %d\nd = %d\nnot_flags = %d\narg = %s\n", b64->flags.i, b64->flags.o, b64->flags.e, b64->flags.d, b64->not_flags, av[b64->not_flags]);
+	while (b64_argv_parse(b64, av))
+    	b64->not_flags++;
+	printf("i = %d\no = %d\ne = %d\nd = %d\n", b64->flags.i, b64->flags.o, b64->flags.e, b64->flags.d);
+    if (b64->flags.i)
     {
       printf("Error, filename not found after 'i' flag\n");
       exit(-1);
     }
-    if (b64->flags.no)
+    if (b64->flags.o)
     {
       printf("Error, filename not found after 'o' flag\n");
       exit(-1);
@@ -159,47 +183,63 @@ char *b64_get_table(void)
   return (table);
 }
 
-char *b64_clean_decode_input(t_b64 *b64, char *str)
+char *b64_read_file(t_b64 *b64)
 {
+	char *ret;
+
+	ret = NULL;
+	b64->str = ret;
+	return (ret);
+}
+
+void b64_clean_decode_input(t_b64 *b64)
+{
+	char *str;
   char *table;
-  char *ret;
   int i;
   int len;
 
+	b64->str = b64_read_file(b64);
+	str = b64->str;
   table = b64_get_table();
   i = 0;
   len = 0;
+  if (!str)
+    str = ft_strdup("");
   while (str[i])
   {
     if (b64_index(table, str[i]) >= 0 || str[i] == '=')
       len++;
     i++;
   }
-  ret = (char*)malloc(sizeof(char) * (len + 1));
-  if (!ret)
+  if (!len)
+  {
+    printf("Wrong format: %s\n", str);
+    exit(-1);
+  }
+  b64->str = (char*)malloc(sizeof(char) * (len + 1));
+  if (!b64->str)
   {
     printf("Error with malloc\n");
     exit(-1);
   }
-  ft_bzero(ret, len + 1);
+  ft_bzero(b64->str, len + 1);
   i = 0;
   len = 0;
   while (str[i])
   {
     if (b64_index(table, str[i]) >= 0 || str[i] == '=')
-      ret[len++] = str[i];
+      b64->str[len++] = str[i];
     i++;
   }
-  return (ret);
 }
 
 void b64_decode(t_b64 *b64)
 {
   char *table;
   uint32_t len;
-  uint32_t outlen;
   uint32_t iter;
-  int i;
+  uint32_t i;
   char tmp;
   int index;
   int bit;
@@ -211,9 +251,9 @@ void b64_decode(t_b64 *b64)
     printf("Wrong format: %s\n", b64->str);
     exit(-1);
   }
-  outlen = len * 6 / 8;
-  b64->result = (char*)malloc(sizeof(char) * (outlen + 1));
-  ft_bzero(b64->result, outlen + 1);
+  b64->outlen = len * 6 / 8;
+  b64->result = (char*)malloc(sizeof(char) * (b64->outlen + 1));
+  ft_bzero(b64->result, b64->outlen + 1);
   tmp = 0;
   i = 0;
   iter = 0;
@@ -230,22 +270,20 @@ void b64_decode(t_b64 *b64)
     if (!(i % 8))
     {
       b64->result[(i - 1) / 8] = tmp;
-      printf("[%d] %c\n", tmp, tmp);
       tmp = 0;
     }
     i++;
   }
   if (i % 8 || b64->str[i / 6] == '=')
     b64->result[(i - 1) / 8] = tmp;
-  printf("%s", b64->result);
+  printf("%s", b64->result); // get 64 \n
 }
 
 void b64_encode(t_b64 *b64)
 {
   uint32_t len;
-  uint32_t outlen;
   char *table;
-  int i;
+  uint32_t i;
   int tmp;
   int bit;
 
@@ -283,7 +321,7 @@ void b64_encode(t_b64 *b64)
     i++;
   }
   b64->result[i] = '\0';
-  printf("%s", b64->result);
+  printf("%s", b64->result); // get 64 \n
 }
 
 void base64_init(int ac, char **av)
@@ -296,15 +334,14 @@ void base64_init(int ac, char **av)
     printf("Error with malloc\n");
     exit(ac);
   }
-  // b64_parse_flags(b64, av);
-  // so we make memlen * 8 / 6 char array and map it to the string of 64 bytes long...
-  //ok it may be easy, the only hard thing is division to 6 bits... maybe take bit by bit and iterate through 8 bits of char and then iterate through 6 bits of output... mkay, seems easy... need to see how flags work
-  // encode done, decode to go, not bad huh
-  // almost working, need to make sure there are no spaces, dunno how original handles it
   // omg its done, now for the real challenge...
   // flags are pita
+  b64->infile = STDIN_FILENO;
+  b64->outfile = STDOUT_FILENO;
   b64_parse_flags(b64, av);
-  b64->str = b64_clean_decode_input(b64, av[2]);
+  b64_clean_decode_input(b64);
+  if (!b64->str)
+    b64->str = ft_strdup("");
   // b64_encode(b64);
   b64_decode(b64);
 }

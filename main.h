@@ -21,8 +21,6 @@ typedef struct  s_baseflags
     char e;
     char i;
     char o;
-    char ni;
-    char no;
 }               t_baseflags;
 
 typedef struct  s_ssl
@@ -109,7 +107,6 @@ typedef struct  s_b64
     char *str;
     char *result;
     uint32_t outlen;
-
     int outfile;
     int infile;
     int not_flags;
