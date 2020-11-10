@@ -124,4 +124,15 @@ void		md5_set_length(t_md5 *md5);
 void		md5_prepare_message(t_md5 *md5);
 void		md5_output(t_md5 *md5);
 void		md5_free(t_md5 **md5);
+void		sha256_constants(t_sha256 *sha256);
+int			sha256_get_string(t_sha256 *sha256, char *str);
+void		sha256_set_length(t_sha256 *sha256);
+void		sha256_prepare_message(t_sha256 *sha256);
+void		sha256_main(t_sha256 *sha256);
+void		sha256_output(t_sha256 *sha256);
+void		sha256_free(t_sha256 **sha256);
+uint32_t	*initialize_w(t_sha256 *sha256);
+uint32_t	*get_r(void);
+void		sha256_parse_flags(t_sha256 *sha256, char **av);
+void		sha256_start(t_sha256 *sha256, int ac, char **av);
 #endif
