@@ -22,37 +22,6 @@ typedef struct	s_ssl
     void	(*hash_init[HASH_COUNT])(int, char**);
 }				t_ssl;
 
-typedef struct	s_md5
-{
-    char		*str;
-    void		*input;
-    uint32_t	len;
-    uint64_t	bits_len;
-    uint64_t	append_len;
-    uint64_t	needed_len;
-    uint64_t	zeroes_len;
-    uint32_t	void_len;
-    uint32_t	A;
-    uint32_t	B;
-    uint32_t	C;
-    uint32_t	D;
-    uint32_t	aa;
-    uint32_t	bb;
-    uint32_t	cc;
-    uint32_t	dd;
-    uint32_t	g;
-    uint32_t	f;
-    uint32_t	tmp;
-    uint32_t	i;
-    uint32_t	*k;
-    uint32_t	*s;
-    char		*file;
-    t_hashflags	flags;
-    t_hashflags	out;
-    int			not_flags;
-    void		(*rounds[4])(struct s_md5*);
-}               t_md5;
-
 typedef struct	s_sha256
 {
     uint32_t	h0;
@@ -93,10 +62,37 @@ typedef struct	s_sha256
     char		*file;
 }				t_sha256;
 
-void		ft_f(t_md5 *md5);
-void		ft_g(t_md5 *md5);
-void		ft_h(t_md5 *md5);
-void		ft_i(t_md5 *md5);
+typedef struct	s_md5
+{
+    char		*str;
+    void		*input;
+    uint32_t	len;
+    uint64_t	bits_len;
+    uint64_t	append_len;
+    uint64_t	needed_len;
+    uint64_t	zeroes_len;
+    uint32_t	void_len;
+    uint32_t	A;
+    uint32_t	B;
+    uint32_t	C;
+    uint32_t	D;
+    uint32_t	aa;
+    uint32_t	bb;
+    uint32_t	cc;
+    uint32_t	dd;
+    uint32_t	g;
+    uint32_t	f;
+    uint32_t	tmp;
+    uint32_t	i;
+    uint32_t	*k;
+    uint32_t	*s;
+    char		*file;
+    t_hashflags	flags;
+    t_hashflags	out;
+    int			not_flags;
+    void		(*rounds[4])(struct s_md5*);
+}               t_md5;
+
 uint32_t	*get_s(void);
 uint32_t	*get_k(void);
 long		ft_strlen(char *str);
@@ -105,17 +101,27 @@ char		*ft_realloc(char **str, char *tmp, int total, int got);
 void		ft_bzero(void *ptr, int len);
 char		*ft_memdup(char *tmp, int got);
 uint32_t	btol(uint32_t num);
-void		ft_md5(t_ssl *ssl, int ac, char **av);
-int			parse_flags(t_ssl *ssl, char **av);
 uint32_t	ft_leftrotate(uint32_t what, uint32_t to);
 uint32_t	ft_rightrotate(uint32_t what, uint32_t to);
 void		ft_sha256(t_ssl *ssl, int ac, char **av);
 int			ft_strcmp(char *s1, char *s2);
-void		md5_init(int ac, char **av);
 void		sha256_init(int ac, char **av);
-void		start(t_ssl *ssl, int ac, char **av);
 char		*ft_strnew(int size);
 void		check_malloc(void *addr);
 void		ft_usage(void);
 void		wrong_command(t_ssl *ssl, char *str);
+void		ft_f(t_md5 *md5);
+void		ft_g(t_md5 *md5);
+void		ft_h(t_md5 *md5);
+void		ft_i(t_md5 *md5);
+void		md5_parse_flags(t_md5 *md5, char **av);
+void		md5_main(t_md5 *md5);
+void		md5_start(t_md5 *md5, int ac, char **av);
+void		md5_init(int ac, char **av);
+void		md5_constants(t_md5 *md5);
+int			md5_get_string(t_md5 *md5, char *str);
+void		md5_set_length(t_md5 *md5);
+void		md5_prepare_message(t_md5 *md5);
+void		md5_output(t_md5 *md5);
+void		md5_free(t_md5 **md5);
 #endif

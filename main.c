@@ -36,7 +36,7 @@ int main(int ac, char **av)
         }
         i++;
     }
-    if (i == HASH_COUNT) // OH GOD ITS UGLY MAKE A FLAG OR SMTH FFS
+    if (i == HASH_COUNT)
 		wrong_command(ssl, av[1]);
     return (0);
 }
