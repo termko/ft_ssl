@@ -7,7 +7,7 @@ void	sha256_init(int ac, char **av)
     sha256 = (t_sha256*)malloc(sizeof(t_sha256));
     if (!sha256)
     {
-        printf("Error with Malloc\n");
+        ft_putstr("Error with Malloc\n");
         exit(1);
     }
     sha256->r = get_r();

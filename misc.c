@@ -52,3 +52,9 @@ long		ft_strlen(char *str)
 		len++;
 	return len;
 }
+
+void		ft_putstr(char *str)
+{
+	while (*str)
+		write(1, str++, 1);
+}

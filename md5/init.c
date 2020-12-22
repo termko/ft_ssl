@@ -9,7 +9,7 @@ void md5_init(int ac, char **av)
     md5 = (t_md5*)malloc(sizeof(t_md5));
     if (!md5)
     {
-        printf("Error with malloc\n");
+        ft_putstr("Error with malloc\n");
         exit(1);
     }
     md5->k = get_k();

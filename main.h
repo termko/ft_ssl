@@ -3,7 +3,6 @@
 # include <stdlib.h>
 # include <string.h>
 # include <unistd.h>
-# include <stdio.h>
 # include <stdint.h>
 # include <fcntl.h>
 # define HASH_COUNT 2
@@ -97,6 +96,7 @@ uint32_t	*get_s(void);
 uint32_t	*get_k(void);
 long		ft_strlen(char *str);
 char		*ft_strdup(char *str);
+void		ft_putstr(char *str);
 char		*ft_realloc(char **str, char *tmp, int total, int got);
 void		ft_bzero(void *ptr, int len);
 char		*ft_memdup(char *tmp, int got);

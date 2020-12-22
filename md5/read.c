@@ -25,7 +25,8 @@ void	md5_read_file(t_md5 *md5, char *file)
         fd = open(file, O_RDONLY);
         if (fd < 0)
         {
-            printf("OOOOOO WRONG FILE BABE '%s'\n", file);
+//            printf("OOOOOO WRONG FILE BABE '%s'\n", file); REMAKE ME
+		ft_putstr("PLACEHOLDER\n");
             return ;
         }
     }

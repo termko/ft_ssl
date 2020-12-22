@@ -4,9 +4,10 @@ void	check_malloc(void *addr)
 {
 	if (!addr)
 	{
-		printf("Unexpected error with malloc!\n");
-		exit(-1);
+		ft_putstr("Unexpected error with malloc!\n");
+		return (-1);
 	}
+	return (0);
 }
 
 char	*ft_strnew(int size)
@@ -14,7 +15,8 @@ char	*ft_strnew(int size)
     char	*ret;
     int		i;
 
-    check_malloc(ret = (char*)malloc(sizeof(char) * size));
+    if (ret = (char*)malloc(sizeof(char) * size))
+	return (NULL);
     i = 0;
     while (i < size)
     {
@@ -45,7 +47,8 @@ char	*ft_strdup(char *str)
     len = 0;
     while (str[len])
         len++;
-    check_malloc(ret = (char*)malloc(sizeof(char) * (len + 1)));
+    if (ret = (char*)malloc(sizeof(char) * (len + 1)))
+	return (NULL)
     i = 0;
     while (i < len)
     {
@@ -61,7 +64,8 @@ char	*ft_memdup(char *tmp, int got)
 	char	*ret;
 	int		i;
 
-	check_malloc(ret = (char*)malloc(sizeof(char) * got));
+	if (ret = (char*)malloc(sizeof(char) * got))
+		return (NULL);
 	i = 0;
 	while (i < got)
 	{

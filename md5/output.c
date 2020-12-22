@@ -2,8 +2,10 @@
 
 void	md5_hash_output(t_md5 *md5)
 {
-	printf("%08x%08x%08x%08x",
-		btol(md5->A), btol(md5->B), btol(md5->C), btol(md5->D));
+//	printf("%08x%08x%08x%08x",
+//		btol(md5->A), btol(md5->B), btol(md5->C), btol(md5->D));
+	ft_putstr("PLACEHOLDER\n");
+	(void)md5;
 }
 
 void	md5_verbal_output(t_md5 *md5)
@@ -13,22 +15,26 @@ void	md5_verbal_output(t_md5 *md5)
 		md5_hash_output(md5);
 		if (md5->out.s)
 		{
-			printf(" \"%s\"", md5->str);
+			//printf(" \"%s\"", md5->str);
+			ft_putstr("PLACEHOLDER\n");
 			md5->out.s = 0;
 		}
 		else
-			printf(" %s", md5->file);
+			ft_putstr("PLACEHOLDER\n");
+			// printf(" %s", md5->file);
 	}
 	else
 	{
-		printf("MD5(");
+		ft_putstr("MD5(");
 		if (md5->out.s)
 		{
-			printf("\"%s\")= ", md5->str);
+			ft_putstr("PLACEHOLDER\n");
+			//printf("\"%s\")= ", md5->str);
 			md5->out.s = 0;
 		}
 		else
-			printf("%s)= ", md5->file);
+			ft_putstr("PLACEHOLDER\n");
+			//printf("%s)= ", md5->file);
 		md5_hash_output(md5);
 	}
 }
@@ -37,9 +43,9 @@ void	md5_output(t_md5 *md5)
 {
     if (md5->out.p)
     {
-		printf("%s", md5->str);
+		ft_putstr(md5->str);
 		md5_hash_output(md5);
-		printf("\n");
+		ft_putstr("\n");
 		md5->out.p = 0;
 		return ;
 	}
@@ -47,5 +53,5 @@ void	md5_output(t_md5 *md5)
 		md5_verbal_output(md5);
 	else
 		md5_hash_output(md5);
-	printf("\n");
+	ft_putstr("\n");
 }

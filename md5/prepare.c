@@ -12,7 +12,7 @@ void	md5_prepare_message(t_md5 *md5)
 	md5->input = malloc(md5->void_len);
 	if (!(md5->input))
 	{
-		printf("Malloc Error\n");
+		ft_putstr("Malloc Error\n");
 		exit(-1);
 	}
 	ft_bzero(md5->input, md5->void_len);

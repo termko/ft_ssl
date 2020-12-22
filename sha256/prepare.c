@@ -33,7 +33,7 @@ void	sha256_prepare_message(t_sha256 *sha256)
 	sha256->input = malloc(sha256->void_len);
 	if (!(sha256->input))
 	{
-		printf("Malloc Error\n");
+		ft_putstr("Malloc Error\n");
 		exit(-1);
 	}
 	ft_bzero(sha256->input, sha256->void_len);
