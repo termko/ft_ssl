@@ -1,6 +1,6 @@
 #include "main.h"
 
-void	check_malloc(void *addr)
+int check_malloc(void *addr)
 {
 	if (!addr)
 	{
@@ -15,7 +15,7 @@ char	*ft_strnew(int size)
     char	*ret;
     int		i;
 
-    if (ret = (char*)malloc(sizeof(char) * size))
+    if (check_malloc(ret = (char*)malloc(sizeof(char) * size)))
 	return (NULL);
     i = 0;
     while (i < size)
@@ -45,10 +45,10 @@ char	*ft_strdup(char *str)
     if (!str)
         return (NULL);
     len = 0;
-    while (str[len])
-        len++;
-    if (ret = (char*)malloc(sizeof(char) * (len + 1)))
-	return (NULL)
+	while (str[len])
+		len++;
+	if (check_malloc(ret = (char*)malloc(sizeof(char) * (len + 1))))
+		return (NULL);
     i = 0;
     while (i < len)
     {
@@ -64,7 +64,7 @@ char	*ft_memdup(char *tmp, int got)
 	char	*ret;
 	int		i;
 
-	if (ret = (char*)malloc(sizeof(char) * got))
+	if (check_malloc(ret = (char*)malloc(sizeof(char) * got)))
 		return (NULL);
 	i = 0;
 	while (i < got)

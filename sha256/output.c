@@ -3,6 +3,7 @@
 void	sha256_hash_output(t_sha256 *sha256)
 {
 	(void)sha256;
+	ft_putstr("PLACEHOLDER\n");
 //  printf("%08x%08x%08x%08x%08x%08x%08x%08x",
 //          sha256->h0, sha256->h1, sha256->h2, sha256->h3,
 //        sha256->h4, sha256->h5, sha256->h6, sha256->h7); // REMAKE ME

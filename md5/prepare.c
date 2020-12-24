@@ -1,6 +1,6 @@
 #include "../main.h"
 
-void	md5_prepare_message(t_md5 *md5)
+int	md5_prepare_message(t_md5 *md5)
 {
 	uint64_t	void_len_bits;
 	uint32_t	i;
@@ -8,13 +8,9 @@ void	md5_prepare_message(t_md5 *md5)
 	void_len_bits = md5->append_len + md5->bits_len;
 	if (md5->append_len <= 64)
 		void_len_bits += 512;
-	md5->void_len  = void_len_bits / 8;
-	md5->input = malloc(md5->void_len);
-	if (!(md5->input))
-	{
-		ft_putstr("Malloc Error\n");
-		exit(-1);
-	}
+	md5->void_len = void_len_bits / 8;
+	if (check_malloc(md5->input = malloc(md5->void_len)))
+		return (-1);
 	ft_bzero(md5->input, md5->void_len);
 	i = 0;
 	while (i < md5->len)
@@ -24,6 +20,7 @@ void	md5_prepare_message(t_md5 *md5)
 	}
 	((char*)(md5->input))[i] = 0x80;
 	((long*)md5->input)[(md5->void_len / 8) - 1] = md5->bits_len;
+	return (0);
 }
 
 void	md5_set_length(t_md5 *md5)

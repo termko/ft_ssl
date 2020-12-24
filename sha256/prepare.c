@@ -21,7 +21,7 @@ void	prepare_length(void *input, uint32_t len, uint64_t len_bits)
 	}
 }
 
-void	sha256_prepare_message(t_sha256 *sha256)
+int		sha256_prepare_message(t_sha256 *sha256)
 {
 	uint64_t	void_len_bits;
 	uint32_t	i;
@@ -30,12 +30,8 @@ void	sha256_prepare_message(t_sha256 *sha256)
 	if (sha256->append_len <= 64)
 		void_len_bits += 512;
 	sha256->void_len = void_len_bits / 8;
-	sha256->input = malloc(sha256->void_len);
-	if (!(sha256->input))
-	{
-		ft_putstr("Malloc Error\n");
-		exit(-1);
-	}
+	if (check_malloc(sha256->input = malloc(sha256->void_len)))
+		return (-1);
 	ft_bzero(sha256->input, sha256->void_len);
 	i = 0;
 	while (i < sha256->len)
@@ -45,6 +41,7 @@ void	sha256_prepare_message(t_sha256 *sha256)
 	}
 	((char*)(sha256->input))[i] = 0x80;
 	prepare_length(sha256->input, sha256->void_len, sha256->bits_len);
+	return (0);
 }
 
 void	sha256_constants(t_sha256 *sha256)

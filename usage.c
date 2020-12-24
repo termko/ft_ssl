@@ -1,13 +1,13 @@
 #include "main.h"
 
-void	ft_usage(void)
+int	ft_usage(void)
 {
 	//printf("usage: ft_ssl command [command opts] [command args]\n"); // STDERR WITH FPRINTF
 	ft_putstr("PLACEHOLDER\n");
-	exit(-1);
+	return (-1);
 }
 
-void	wrong_command(t_ssl *ssl, char *str)
+int	wrong_command(t_ssl *ssl, char *str)
 {
 	int	i;
 
@@ -26,6 +26,6 @@ void	wrong_command(t_ssl *ssl, char *str)
 	(void)ssl;
 	(void)str;
 	//printf("Cipher commands:\n");
-	exit(-1);
+	return (-1);
 	// MAKE EVERY PLACEHOLDER A STDERR
 }

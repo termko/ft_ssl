@@ -27,7 +27,8 @@ char		*ft_realloc(char **str, char *tmp, int total, int got)
 	int		j;
 
 	i = 0;
-	ret = ft_strnew(total + got);
+	if (check_malloc(ret = ft_strnew(total + got)))
+		return (NULL);
 	while (i < total)
 	{
 		ret[i] = (*str)[i];

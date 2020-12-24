@@ -11,8 +11,6 @@ int		md5_argv_parse(t_hashflags *flags, char *arg)
 		return (0);
 	if (arg[0] != '-')
 		return (0);
-	if (arg[1] != 'p' && arg[1] != 'q' && arg[1] != 'r' && arg[1] != 's')
-		return (0);
 	if (arg[1] == 'p')
 		flags->p = 1;
 	else if (arg[1] == 'q')
